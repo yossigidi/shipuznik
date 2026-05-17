@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import { Ruler, Share2 } from 'lucide-react'
-import { ROOM_RULES, MATERIAL_CATALOG } from '../data/materials'
+import { Ruler, Share2, ChevronDown } from 'lucide-react'
+import { ROOM_RULES, MATERIAL_CATALOG, MATERIAL_CATEGORIES } from '../data/materials'
 import { num } from '../utils/format'
 
 export default function QuantityCalcPage() {
@@ -8,8 +8,10 @@ export default function QuantityCalcPage() {
   const [length, setLength] = useState(3)
   const [width, setWidth] = useState(2)
   const [wallHeight, setWallHeight] = useState(2.5)
+  const [openCats, setOpenCats] = useState(() => new Set(MATERIAL_CATEGORIES.map(c => c.id)))
 
   const room = ROOM_RULES[roomKey]
+
   const results = useMemo(() => {
     if (!room) return []
     const raw = room.calc({
@@ -19,20 +21,44 @@ export default function QuantityCalcPage() {
     })
     return raw.map(r => {
       const mat = MATERIAL_CATALOG[r.key]
+      if (!mat) return null
       const withWaste = r.qty * (1 + (r.waste || 0) / 100)
-      // לחומרים שמגיעים ביחידות שלמות — לעגל למעלה
       const isWhole = ['bag', 'unit'].includes(mat.unit)
-      const qty = isWhole ? Math.ceil(withWaste) : Number(withWaste.toFixed(2))
-      return { ...r, mat, qty, withWaste }
-    })
+      const qty = isWhole ? Math.ceil(withWaste) : +(withWaste.toFixed(2))
+      return { ...r, mat, qty }
+    }).filter(Boolean)
   }, [room, length, width, wallHeight])
+
+  // קיבוץ לפי קטגוריה
+  const grouped = useMemo(() => {
+    const map = new Map()
+    for (const cat of MATERIAL_CATEGORIES) map.set(cat.id, [])
+    for (const r of results) {
+      const list = map.get(r.mat.categoryId)
+      if (list) list.push(r)
+    }
+    return MATERIAL_CATEGORIES.map(cat => ({ ...cat, items: map.get(cat.id) || [] })).filter(g => g.items.length > 0)
+  }, [results])
+
+  function toggleCat(id) {
+    setOpenCats(s => {
+      const next = new Set(s)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   function share() {
     const lines = [
       `רשימת קניות — ${room.name}`,
       `${length}×${width} מ׳, גובה ${wallHeight} מ׳`,
       '',
-      ...results.map(r => `• ${r.label}: ${num(r.qty)} ${r.mat.niceUnit}`),
+      ...grouped.flatMap(g => [
+        `*${g.name}*`,
+        ...g.items.map(r => `• ${r.label}: ${num(r.qty)} ${r.mat.niceUnit}`),
+        '',
+      ]),
     ]
     const text = encodeURIComponent(lines.join('\n'))
     window.open(`https://wa.me/?text=${text}`, '_blank')
@@ -49,9 +75,7 @@ export default function QuantityCalcPage() {
               onClick={() => setRoomKey(key)}
               className={[
                 'p-3 rounded-xl border-2 text-center transition-colors',
-                roomKey === key
-                  ? 'border-brand-500 bg-brand-50'
-                  : 'border-gray-200 bg-white hover:border-gray-300',
+                roomKey === key ? 'border-brand-500 bg-brand-50' : 'border-gray-200 bg-white',
               ].join(' ')}
             >
               <div className="text-2xl">{r.icon}</div>
@@ -86,23 +110,43 @@ export default function QuantityCalcPage() {
       </div>
 
       <div>
-        <h3 className="font-bold mb-2 px-1">רשימת חומרים</h3>
+        <h3 className="font-bold mb-2 px-1">רשימת חומרים מלאה</h3>
         <div className="space-y-2">
-          {results.map(r => (
-            <div key={r.key} className="card flex items-center justify-between">
-              <div>
-                <div className="font-semibold">{r.label}</div>
-                <div className="text-xs text-gray-500">
-                  {r.mat.name}
-                  {r.waste > 0 && <span> · כולל {r.waste}% לפסולת</span>}
-                </div>
+          {grouped.map(g => {
+            const isOpen = openCats.has(g.id)
+            return (
+              <div key={g.id} className="card overflow-hidden p-0">
+                <button
+                  onClick={() => toggleCat(g.id)}
+                  className="w-full flex items-center gap-2 p-3 hover:bg-gray-50"
+                >
+                  <span className="text-xl">{g.icon}</span>
+                  <span className="font-bold flex-1 text-right">{g.name}</span>
+                  <span className="text-xs text-gray-500">{g.items.length}</span>
+                  <ChevronDown className={['w-4 h-4 text-gray-400 transition-transform', isOpen ? '' : '-rotate-90'].join(' ')} />
+                </button>
+                {isOpen && (
+                  <div className="border-t border-gray-100 divide-y divide-gray-50">
+                    {g.items.map(r => (
+                      <div key={r.key + r.label} className="flex items-center justify-between px-3 py-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-gray-900 text-sm">{r.label}</div>
+                          <div className="text-xs text-gray-500">
+                            {r.mat.name}
+                            {r.waste > 0 && <span> · +{r.waste}%</span>}
+                          </div>
+                        </div>
+                        <div className="text-left ms-2">
+                          <div className="font-bold text-gray-900">{num(r.qty)}</div>
+                          <div className="text-[10px] text-gray-500">{r.mat.niceUnit}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="text-left">
-                <div className="text-xl font-bold text-gray-900">{num(r.qty)}</div>
-                <div className="text-xs text-gray-500">{r.mat.niceUnit}</div>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Trash2, Share2, FileText, Phone, MapPin, Pencil, ListChecks, CircleDollarSign, Image as ImageIcon } from 'lucide-react'
+import { Plus, Trash2, Share2, FileText, Phone, MapPin, Pencil, ListChecks, CircleDollarSign, Image as ImageIcon, Sparkles } from 'lucide-react'
 import { getProject, saveProject, deleteProject } from '../utils/storage'
 import { nis } from '../utils/format'
 import { UNIT_LABELS } from '../data/workItems'
 import AddItemSheet from '../components/AddItemSheet'
 import PaymentsPanel from '../components/PaymentsPanel'
 import PhotosPanel from '../components/PhotosPanel'
+import PackagePicker from '../components/PackagePicker'
 
 const TABS = [
   { id: 'items',    label: 'פריטים',   icon: ListChecks },
@@ -16,6 +17,7 @@ const TABS = [
 export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
   const [project, setProject] = useState(null)
   const [showSheet, setShowSheet] = useState(false)
+  const [showPackages, setShowPackages] = useState(false)
   const [editingHeader, setEditingHeader] = useState(false)
   const [tab, setTab] = useState('items')
 
@@ -36,6 +38,11 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
   function addItem(item) {
     update({ items: [...(project.items || []), item] })
     setShowSheet(false)
+  }
+
+  function addItemsBulk(items) {
+    update({ items: [...(project.items || []), ...items] })
+    setShowPackages(false)
   }
 
   function removeItem(id) {
@@ -113,6 +120,7 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
           project={project}
           total={total}
           onAdd={() => setShowSheet(true)}
+          onAddPackage={() => setShowPackages(true)}
           onRemove={removeItem}
           onShare={shareToWhatsapp}
           onClientView={() => onNavigate('clientView', { id: project.id })}
@@ -142,6 +150,7 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
       </button>
 
       {showSheet && <AddItemSheet onClose={() => setShowSheet(false)} onAdd={addItem} />}
+      {showPackages && <PackagePicker onClose={() => setShowPackages(false)} onAdd={addItemsBulk} />}
     </div>
   )
 }
@@ -176,7 +185,9 @@ function ProjectHeader({ project, onEdit }) {
   )
 }
 
-function ItemsTab({ project, total, onAdd, onRemove, onShare, onClientView }) {
+function ItemsTab({ project, total, onAdd, onAddPackage, onRemove, onShare, onClientView }) {
+  const isEmpty = (project.items || []).length === 0
+
   return (
     <>
       <section>
@@ -184,6 +195,21 @@ function ItemsTab({ project, total, onAdd, onRemove, onShare, onClientView }) {
           <h2 className="font-bold text-gray-900">פריטי עבודה</h2>
           <span className="text-sm text-gray-500">{(project.items || []).length} פריטים</span>
         </div>
+
+        {isEmpty && (
+          <button
+            onClick={onAddPackage}
+            className="w-full card bg-gradient-to-br from-brand-500 to-brand-600 text-white text-right mb-2 hover:shadow-soft transition-shadow"
+          >
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-6 h-6" />
+              <div className="flex-1">
+                <div className="font-bold">התחל מחבילה מוכנה</div>
+                <div className="text-xs opacity-90">קוסמטי / חלקי / מלא לפי חדר — 10 שניות</div>
+              </div>
+            </div>
+          </button>
+        )}
 
         <div className="space-y-2">
           {(project.items || []).map(it => (
@@ -208,12 +234,20 @@ function ItemsTab({ project, total, onAdd, onRemove, onShare, onClientView }) {
             </div>
           ))}
 
-          <button
-            onClick={onAdd}
-            className="w-full card border-2 border-dashed border-gray-200 text-brand-600 font-semibold hover:bg-brand-50"
-          >
-            <Plus className="w-5 h-5 inline" /> הוסף פריט עבודה
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={onAdd}
+              className="card border-2 border-dashed border-gray-200 text-brand-600 font-semibold hover:bg-brand-50 py-3 text-sm"
+            >
+              <Plus className="w-5 h-5 inline" /> פריט בודד
+            </button>
+            <button
+              onClick={onAddPackage}
+              className="card border-2 border-dashed border-brand-200 bg-brand-50 text-brand-700 font-semibold hover:bg-brand-100 py-3 text-sm"
+            >
+              <Sparkles className="w-5 h-5 inline" /> חבילה מוכנה
+            </button>
+          </div>
         </div>
       </section>
 

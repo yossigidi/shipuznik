@@ -5,6 +5,7 @@ export const MATERIAL_CATEGORIES = [
   { id: 'demo',       name: 'הריסה והכנה',   icon: '🧹' },
   { id: 'walls',      name: 'קירות ותקרה',   icon: '🧱' },
   { id: 'insulation', name: 'בידוד',         icon: '🧊' },
+  { id: 'plumbing',   name: 'אינסטלציה',     icon: '🚰' },
   { id: 'electrical', name: 'חשמל ותקשורת', icon: '⚡' },
   { id: 'flooring',   name: 'ריצוף',         icon: '🟫' },
   { id: 'paint',      name: 'צבע וגימור',    icon: '🎨' },
@@ -32,7 +33,22 @@ export const MATERIAL_CATALOG = {
   glasswool:        { categoryId: 'insulation', name: 'צמר זכוכית',       unit: 'm²', niceUnit: 'מ"ר', price: 28, markupPct: 10 },
   acoustic_board:   { categoryId: 'insulation', name: 'בידוד אקוסטי',     unit: 'm²', niceUnit: 'מ"ר', price: 65, markupPct: 10 },
 
-  // ─── 4. חשמל ותקשורת ────────────────────────────────────────────
+  // ─── 4. אינסטלציה ────────────────────────────────────────────────
+  pipe_pvc:         { categoryId: 'plumbing', name: 'צינור PVC לניקוז',     unit: 'm',    niceUnit: 'מטר',     price: 18,  markupPct: 15 },
+  pipe_pex:         { categoryId: 'plumbing', name: 'צינור פקס למים',       unit: 'm',    niceUnit: 'מטר',     price: 12,  markupPct: 15 },
+  pipe_fitting:     { categoryId: 'plumbing', name: 'מחברים ואביזרי צנרת',  unit: 'unit', niceUnit: 'יחידה',   price: 8,   markupPct: 15 },
+  ball_valve:       { categoryId: 'plumbing', name: 'ברז ניתוק',            unit: 'unit', niceUnit: 'יחידה',   price: 45,  markupPct: 15 },
+  siphon:           { categoryId: 'plumbing', name: 'סיפון',                unit: 'unit', niceUnit: 'יחידה',   price: 65,  markupPct: 15 },
+  floor_drain:      { categoryId: 'plumbing', name: 'מחסום רצפה',           unit: 'unit', niceUnit: 'יחידה',   price: 95,  markupPct: 15 },
+  teflon_tape:      { categoryId: 'plumbing', name: 'סרט טפלון',            unit: 'unit', niceUnit: 'גליל',    price: 8,   markupPct: 10 },
+  pipe_sealant:     { categoryId: 'plumbing', name: 'חומר איטום צנרת',      unit: 'unit', niceUnit: 'שפופרת',  price: 25,  markupPct: 10 },
+  toilet_unit:      { categoryId: 'plumbing', name: 'אסלה',                 unit: 'unit', niceUnit: 'יחידה',   price: 800, markupPct: 20 },
+  sink_unit:        { categoryId: 'plumbing', name: 'כיור',                 unit: 'unit', niceUnit: 'יחידה',   price: 450, markupPct: 20 },
+  faucet_unit:      { categoryId: 'plumbing', name: 'ברז',                  unit: 'unit', niceUnit: 'יחידה',   price: 250, markupPct: 20 },
+  shower_set:       { categoryId: 'plumbing', name: 'סט מקלחון',            unit: 'unit', niceUnit: 'יחידה',   price: 600, markupPct: 20 },
+  shower_mixer:     { categoryId: 'plumbing', name: 'מערבל מקלחת',          unit: 'unit', niceUnit: 'יחידה',   price: 380, markupPct: 20 },
+
+  // ─── 5. חשמל ותקשורת ────────────────────────────────────────────
   conduit:          { categoryId: 'electrical', name: 'צנרת חשמל',          unit: 'm',    niceUnit: 'מטר',   price: 6,  markupPct: 10 },
   wire:             { categoryId: 'electrical', name: 'כבלי חשמל',         unit: 'm',    niceUnit: 'מטר',   price: 9,  markupPct: 10 },
   outlet_box:       { categoryId: 'electrical', name: 'קופסת שקע/מפסק',     unit: 'unit', niceUnit: 'יחידה', price: 5,  markupPct: 10 },
@@ -89,6 +105,21 @@ export const ROOM_RULES = {
         { key: 'plaster_gypsum',   qty: Math.ceil(walls * 0.05), waste: 5, label: 'טיח גבס לתיקונים' },
         { key: 'alum_corner',      qty: wallHeight * 4, waste: 5, label: 'פינות אלומיניום' },
 
+        // אינסטלציה — הלב של שיפוץ אמבטיה
+        { key: 'pipe_pvc',      qty: Math.max(4, perimeter * 0.6), waste: 10, label: 'צנרת ניקוז PVC' },
+        { key: 'pipe_pex',      qty: Math.max(8, perimeter * 1.0), waste: 10, label: 'צנרת מים חמים/קרים' },
+        { key: 'pipe_fitting',  qty: 12, waste: 5, label: 'מחברים ואביזרי צנרת' },
+        { key: 'ball_valve',    qty: 2, waste: 0, label: 'ברזי ניתוק (חם+קר)' },
+        { key: 'siphon',        qty: 2, waste: 0, label: 'סיפונים (כיור + מקלחון)' },
+        { key: 'floor_drain',   qty: 1, waste: 0, label: 'מחסום רצפה' },
+        { key: 'teflon_tape',   qty: 2, waste: 0, label: 'סרט טפלון' },
+        { key: 'pipe_sealant',  qty: 2, waste: 0, label: 'חומר איטום צנרת' },
+        { key: 'toilet_unit',   qty: 1, waste: 0, label: 'אסלה' },
+        { key: 'sink_unit',     qty: 1, waste: 0, label: 'כיור' },
+        { key: 'faucet_unit',   qty: 1, waste: 0, label: 'ברז כיור' },
+        { key: 'shower_mixer',  qty: 1, waste: 0, label: 'מערבל מקלחת' },
+        { key: 'shower_set',    qty: 1, waste: 0, label: 'סט מקלחון (יד + מוט)' },
+
         // חשמל
         { key: 'conduit',     qty: 8, waste: 5, label: 'צנרת חשמל לאמבטיה' },
         { key: 'wire',        qty: 12, waste: 5, label: 'כבלי חשמל' },
@@ -105,7 +136,7 @@ export const ROOM_RULES = {
 
         // גימור
         { key: 'primer',          qty: walls * 0.1, waste: 5, label: 'פריימר לפני הדבקה' },
-        { key: 'silicon',         qty: Math.max(2, Math.round(perimeter / 4)), waste: 0, label: 'סיליקון לאטימה' },
+        { key: 'silicon',         qty: Math.max(3, Math.round(perimeter / 3)), waste: 0, label: 'סיליקון לאטימה' },
         { key: 'acrylic_filler',  qty: 2, waste: 0, label: 'אקריל למילוי' },
 
         // דלת
@@ -135,6 +166,16 @@ export const ROOM_RULES = {
         { key: 'plaster_gypsum',   qty: Math.ceil(walls * 0.05), waste: 5, label: 'טיח לתיקונים' },
         { key: 'spakhtel',         qty: Math.ceil(walls / 30),   waste: 5, label: 'שפכטל לפני צבע' },
         { key: 'alum_corner',      qty: wallHeight * 4, waste: 5, label: 'פינות אלומיניום' },
+
+        // אינסטלציה למטבח
+        { key: 'pipe_pvc',      qty: 3, waste: 10, label: 'צנרת ניקוז לכיור' },
+        { key: 'pipe_pex',      qty: 5, waste: 10, label: 'צנרת מים' },
+        { key: 'pipe_fitting',  qty: 6, waste: 5, label: 'מחברים' },
+        { key: 'ball_valve',    qty: 2, waste: 0, label: 'ברזי ניתוק' },
+        { key: 'siphon',        qty: 1, waste: 0, label: 'סיפון לכיור' },
+        { key: 'teflon_tape',   qty: 1, waste: 0, label: 'סרט טפלון' },
+        { key: 'sink_unit',     qty: 1, waste: 0, label: 'כיור מטבח' },
+        { key: 'faucet_unit',   qty: 1, waste: 0, label: 'ברז מטבח' },
 
         // חשמל — מטבח דורש הרבה
         { key: 'conduit',       qty: 25, waste: 5, label: 'צנרת חשמל' },

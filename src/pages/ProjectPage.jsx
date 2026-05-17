@@ -1,18 +1,26 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Trash2, Share2, FileText, Phone, MapPin, Pencil } from 'lucide-react'
+import { Plus, Trash2, Share2, FileText, Phone, MapPin, Pencil, ListChecks, CircleDollarSign, Image as ImageIcon } from 'lucide-react'
 import { getProject, saveProject, deleteProject } from '../utils/storage'
 import { nis } from '../utils/format'
 import { UNIT_LABELS } from '../data/workItems'
 import AddItemSheet from '../components/AddItemSheet'
+import PaymentsPanel from '../components/PaymentsPanel'
+import PhotosPanel from '../components/PhotosPanel'
+
+const TABS = [
+  { id: 'items',    label: 'פריטים',   icon: ListChecks },
+  { id: 'payments', label: 'תשלומים',  icon: CircleDollarSign },
+  { id: 'photos',   label: 'תמונות',   icon: ImageIcon },
+]
 
 export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
   const [project, setProject] = useState(null)
   const [showSheet, setShowSheet] = useState(false)
   const [editingHeader, setEditingHeader] = useState(false)
+  const [tab, setTab] = useState('items')
 
   useEffect(() => {
-    const p = getProject(projectId)
-    setProject(p)
+    setProject(getProject(projectId))
   }, [projectId])
 
   const total = useMemo(() => {
@@ -22,19 +30,16 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
 
   function update(patch) {
     const next = { ...project, ...patch }
-    const saved = saveProject({ ...next, total: calcTotal(next.items) })
-    setProject(saved)
+    setProject(saveProject({ ...next, total: calcTotal(next.items) }))
   }
 
   function addItem(item) {
-    const items = [...(project.items || []), item]
-    update({ items })
+    update({ items: [...(project.items || []), item] })
     setShowSheet(false)
   }
 
   function removeItem(id) {
-    const items = (project.items || []).filter(i => i.id !== id)
-    update({ items })
+    update({ items: (project.items || []).filter(i => i.id !== id) })
   }
 
   function shareToWhatsapp() {
@@ -49,7 +54,7 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
       '',
       `סה״כ: ${nis(total)}`,
     ].filter(Boolean)
-    const link = `${window.location.origin}/?view=${project.id}` // לעתיד: עמוד ציבורי אמיתי
+    const link = `${window.location.origin}/?view=${project.id}`
     const text = encodeURIComponent(lines.join('\n') + `\n\nלאישור וחתימה: ${link}`)
     const phone = (project.phone || '').replace(/[^\d]/g, '').replace(/^0/, '972')
     const url = phone
@@ -73,36 +78,107 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
     <div className="space-y-4">
       <section className="card">
         {editingHeader ? (
-          <EditHeader project={project} onSave={(patch) => { update(patch); setEditingHeader(false) }} onCancel={() => setEditingHeader(false)} />
+          <EditHeader
+            project={project}
+            onSave={(patch) => { update(patch); setEditingHeader(false) }}
+            onCancel={() => setEditingHeader(false)}
+          />
         ) : (
-          <>
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="text-lg font-bold text-gray-900">{project.clientName}</div>
-                <div className="text-sm text-gray-600">{project.title}</div>
-              </div>
-              <button onClick={() => setEditingHeader(true)} className="p-2 -m-2 text-gray-500 hover:text-gray-800">
-                <Pencil className="w-4 h-4" />
-              </button>
-            </div>
-            {(project.phone || project.address) && (
-              <div className="mt-2 space-y-1 text-sm text-gray-600">
-                {project.phone && (
-                  <a href={`tel:${project.phone}`} className="flex items-center gap-2 hover:text-brand-600">
-                    <Phone className="w-4 h-4" /> {project.phone}
-                  </a>
-                )}
-                {project.address && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4" /> {project.address}
-                  </div>
-                )}
-              </div>
-            )}
-          </>
+          <ProjectHeader project={project} onEdit={() => setEditingHeader(true)} />
         )}
       </section>
 
+      <nav className="grid grid-cols-3 gap-1 bg-white rounded-2xl p-1 shadow-card sticky top-[56px] z-10">
+        {TABS.map(t => {
+          const Icon = t.icon
+          const active = tab === t.id
+          return (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={[
+                'flex flex-col items-center gap-0.5 py-2 rounded-xl text-xs font-semibold transition-colors',
+                active ? 'bg-brand-500 text-white' : 'text-gray-600 hover:bg-gray-50',
+              ].join(' ')}
+            >
+              <Icon className="w-4 h-4" />
+              {t.label}
+            </button>
+          )
+        })}
+      </nav>
+
+      {tab === 'items' && (
+        <ItemsTab
+          project={project}
+          total={total}
+          onAdd={() => setShowSheet(true)}
+          onRemove={removeItem}
+          onShare={shareToWhatsapp}
+          onClientView={() => onNavigate('clientView', { id: project.id })}
+        />
+      )}
+
+      {tab === 'payments' && (
+        <PaymentsPanel
+          total={total}
+          milestones={project.milestones || []}
+          onChange={(milestones) => update({ milestones })}
+        />
+      )}
+
+      {tab === 'photos' && (
+        <PhotosPanel
+          photos={project.photos || []}
+          onChange={(photos) => update({ photos })}
+        />
+      )}
+
+      <button
+        onClick={confirmDelete}
+        className="w-full text-sm text-red-500 hover:text-red-700 py-3"
+      >
+        מחק פרוייקט
+      </button>
+
+      {showSheet && <AddItemSheet onClose={() => setShowSheet(false)} onAdd={addItem} />}
+    </div>
+  )
+}
+
+function ProjectHeader({ project, onEdit }) {
+  return (
+    <>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-lg font-bold text-gray-900">{project.clientName}</div>
+          <div className="text-sm text-gray-600">{project.title}</div>
+        </div>
+        <button onClick={onEdit} className="p-2 -m-2 text-gray-500 hover:text-gray-800">
+          <Pencil className="w-4 h-4" />
+        </button>
+      </div>
+      {(project.phone || project.address) && (
+        <div className="mt-2 space-y-1 text-sm text-gray-600">
+          {project.phone && (
+            <a href={`tel:${project.phone}`} className="flex items-center gap-2 hover:text-brand-600">
+              <Phone className="w-4 h-4" /> {project.phone}
+            </a>
+          )}
+          {project.address && (
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4" /> {project.address}
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  )
+}
+
+function ItemsTab({ project, total, onAdd, onRemove, onShare, onClientView }) {
+  return (
+    <>
       <section>
         <div className="flex items-center justify-between mb-2 px-1">
           <h2 className="font-bold text-gray-900">פריטי עבודה</h2>
@@ -122,7 +198,7 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
               <div className="text-left">
                 <div className="font-bold text-gray-900">{nis(it.qty * it.price)}</div>
                 <button
-                  onClick={() => removeItem(it.id)}
+                  onClick={() => onRemove(it.id)}
                   className="text-red-500 hover:text-red-700 p-1 -m-1"
                   aria-label="מחק"
                 >
@@ -133,7 +209,7 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
           ))}
 
           <button
-            onClick={() => setShowSheet(true)}
+            onClick={onAdd}
             className="w-full card border-2 border-dashed border-gray-200 text-brand-600 font-semibold hover:bg-brand-50"
           >
             <Plus className="w-5 h-5 inline" /> הוסף פריט עבודה
@@ -141,38 +217,26 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
         </div>
       </section>
 
-      <section className="card bg-gray-900 text-white flex items-center justify-between">
+      <section className="card bg-gray-900 text-white flex items-center justify-between mt-4">
         <span className="text-sm opacity-80">סה״כ הצעה</span>
         <span className="text-2xl font-bold">{nis(total)}</span>
       </section>
 
-      <section className="grid grid-cols-2 gap-2">
+      <section className="grid grid-cols-2 gap-2 mt-2">
         <button
-          onClick={shareToWhatsapp}
+          onClick={onShare}
           className="btn-primary"
           disabled={(project.items || []).length === 0}
         >
           <Share2 className="w-5 h-5" />
           שלח בוואטסאפ
         </button>
-        <button
-          onClick={() => onNavigate('clientView', { id: project.id })}
-          className="btn-secondary"
-        >
+        <button onClick={onClientView} className="btn-secondary">
           <FileText className="w-5 h-5" />
           תצוגת לקוח
         </button>
       </section>
-
-      <button
-        onClick={confirmDelete}
-        className="w-full text-sm text-red-500 hover:text-red-700 py-3"
-      >
-        מחק פרוייקט
-      </button>
-
-      {showSheet && <AddItemSheet onClose={() => setShowSheet(false)} onAdd={addItem} />}
-    </div>
+    </>
   )
 }
 

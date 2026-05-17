@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, FolderOpen, Calculator, Hammer, ChevronLeft, Zap, Users } from 'lucide-react'
+import { Plus, FolderOpen, Calculator, Hammer, ChevronLeft, Zap, Users, Settings as SettingsIcon } from 'lucide-react'
 import { listProjects } from '../utils/storage'
 import { nis, dateShort } from '../utils/format'
 
@@ -15,14 +15,21 @@ export default function HomePage({ onNavigate }) {
   return (
     <div className="space-y-6">
       <section className="bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-2xl p-5 shadow-soft">
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-white/20 grid place-items-center">
             <Hammer className="w-6 h-6" />
           </div>
-          <div>
+          <div className="flex-1">
             <div className="text-sm opacity-90">שלום, שיפוצניק</div>
             <div className="text-lg font-bold">מה בונים היום?</div>
           </div>
+          <button
+            onClick={() => onNavigate('settings')}
+            className="w-10 h-10 rounded-xl bg-white/20 grid place-items-center hover:bg-white/30"
+            aria-label="הגדרות"
+          >
+            <SettingsIcon className="w-5 h-5" />
+          </button>
         </div>
       </section>
 

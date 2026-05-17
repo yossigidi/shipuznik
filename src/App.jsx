@@ -9,6 +9,9 @@ import CostCalcPage from './pages/CostCalcPage'
 import ClientViewPage from './pages/ClientViewPage'
 import QuickQuotePage from './pages/QuickQuotePage'
 import ClientsPage from './pages/ClientsPage'
+import SettingsPage from './pages/SettingsPage'
+import ContractPage from './pages/ContractPage'
+import InvoicePage from './pages/InvoicePage'
 
 // ניווט בסטייט פשוט — אין react-router, רק עמדת page נוכחית + history
 const PAGE_TITLES = {
@@ -21,6 +24,9 @@ const PAGE_TITLES = {
   clientView:  'הצעת מחיר',
   quickQuote:  'הצעה מהירה',
   clients:     'הלקוחות שלי',
+  settings:    'הגדרות',
+  contract:    'חוזה עבודה',
+  invoice:     'חשבונית',
 }
 
 export default function App() {
@@ -63,6 +69,9 @@ function renderPage(page, params, nav) {
     case 'clientView':   return <ClientViewPage projectId={params.id} />
     case 'quickQuote':   return <QuickQuotePage />
     case 'clients':      return <ClientsPage onNavigate={nav.navigate} />
+    case 'settings':     return <SettingsPage />
+    case 'contract':     return <ContractPage projectId={params.id} onNavigate={nav.navigate} />
+    case 'invoice':      return <InvoicePage projectId={params.id} onNavigate={nav.navigate} />
     default:             return <HomePage onNavigate={nav.navigate} />
   }
 }

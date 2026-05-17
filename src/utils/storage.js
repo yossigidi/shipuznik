@@ -1,6 +1,7 @@
 // אחסון מקומי פשוט ב-localStorage. בעתיד יוחלף ב-Firestore.
 
 const KEY = 'shipuznik:v1'
+const SETTINGS_KEY = 'shipuznik:settings:v1'
 
 function readAll() {
   try {
@@ -13,6 +14,40 @@ function readAll() {
 
 function writeAll(data) {
   localStorage.setItem(KEY, JSON.stringify(data))
+}
+
+const DEFAULT_SETTINGS = {
+  businessName: '',     // שם העסק (לדוגמה: "אבי שיפוצים")
+  ownerName: '',        // שם בעל העסק
+  taxId: '',            // ת.ז. או ע.מ.
+  businessType: 'patur', // patur | murshe
+  phone: '',
+  email: '',
+  address: '',
+  vatRate: 17,          // אחוז מע"מ
+  invoiceCounter: 1,    // מספור רץ לחשבוניות
+}
+
+export function getSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY)
+    return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : { ...DEFAULT_SETTINGS }
+  } catch {
+    return { ...DEFAULT_SETTINGS }
+  }
+}
+
+export function saveSettings(patch) {
+  const next = { ...getSettings(), ...patch }
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(next))
+  return next
+}
+
+export function nextInvoiceNumber() {
+  const s = getSettings()
+  const n = s.invoiceCounter || 1
+  saveSettings({ invoiceCounter: n + 1 })
+  return n
 }
 
 export function listProjects() {

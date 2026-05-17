@@ -127,6 +127,8 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
           onRemove={removeItem}
           onShare={shareToWhatsapp}
           onClientView={() => onNavigate('clientView', { id: project.id })}
+          onContract={() => onNavigate('contract', { id: project.id })}
+          onInvoice={() => onNavigate('invoice', { id: project.id })}
         />
       )}
 
@@ -204,7 +206,7 @@ function ProjectHeader({ project, onEdit }) {
   )
 }
 
-function ItemsTab({ project, total, onAdd, onAddPackage, onRemove, onShare, onClientView }) {
+function ItemsTab({ project, total, onAdd, onAddPackage, onRemove, onShare, onClientView, onContract, onInvoice }) {
   const isEmpty = (project.items || []).length === 0
 
   return (
@@ -287,6 +289,12 @@ function ItemsTab({ project, total, onAdd, onAddPackage, onRemove, onShare, onCl
         <button onClick={onClientView} className="btn-secondary">
           <FileText className="w-5 h-5" />
           תצוגת לקוח
+        </button>
+        <button onClick={onContract} className="btn-secondary text-sm">
+          📄 חוזה
+        </button>
+        <button onClick={onInvoice} className="btn-secondary text-sm">
+          🧾 חשבונית
         </button>
       </section>
     </>

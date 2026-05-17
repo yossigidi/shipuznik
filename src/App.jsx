@@ -7,6 +7,7 @@ import ProjectPage from './pages/ProjectPage'
 import QuantityCalcPage from './pages/QuantityCalcPage'
 import CostCalcPage from './pages/CostCalcPage'
 import ClientViewPage from './pages/ClientViewPage'
+import QuickQuotePage from './pages/QuickQuotePage'
 
 // ניווט בסטייט פשוט — אין react-router, רק עמדת page נוכחית + history
 const PAGE_TITLES = {
@@ -17,6 +18,7 @@ const PAGE_TITLES = {
   quantityCalc:'מחשבון כמויות',
   costCalc:    'מחשבון עלויות',
   clientView:  'הצעת מחיר',
+  quickQuote:  'הצעה מהירה',
 }
 
 export default function App() {
@@ -57,6 +59,7 @@ function renderPage(page, params, nav) {
     case 'quantityCalc': return <QuantityCalcPage />
     case 'costCalc':     return <CostCalcPage />
     case 'clientView':   return <ClientViewPage projectId={params.id} />
+    case 'quickQuote':   return <QuickQuotePage />
     default:             return <HomePage onNavigate={nav.navigate} />
   }
 }

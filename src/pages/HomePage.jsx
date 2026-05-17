@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, FolderOpen, Calculator, Hammer, ChevronLeft } from 'lucide-react'
+import { Plus, FolderOpen, Calculator, Hammer, ChevronLeft, Zap } from 'lucide-react'
 import { listProjects } from '../utils/storage'
 import { nis, dateShort } from '../utils/format'
 
@@ -53,6 +53,20 @@ export default function HomePage({ onNavigate }) {
           onClick={() => onNavigate('costCalc')}
         />
       </section>
+
+      <button
+        onClick={() => onNavigate('quickQuote')}
+        className="w-full card bg-gradient-to-l from-amber-500 to-orange-500 text-white text-right flex items-center gap-3 hover:shadow-soft transition-shadow"
+      >
+        <div className="w-12 h-12 rounded-xl bg-white/20 grid place-items-center flex-shrink-0">
+          <Zap className="w-6 h-6" />
+        </div>
+        <div className="flex-1">
+          <div className="font-bold">הצעה מהירה — מצב שדה</div>
+          <div className="text-xs opacity-90">בלקוח? תן מספר ראשוני ב-30 שניות</div>
+        </div>
+        <ChevronLeft className="w-5 h-5 opacity-80" />
+      </button>
 
       {recent.length > 0 && (
         <section>

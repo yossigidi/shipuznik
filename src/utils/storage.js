@@ -2,6 +2,7 @@
 
 const KEY = 'shipuznik:v1'
 const SETTINGS_KEY = 'shipuznik:settings:v1'
+const SUPPLIERS_KEY = 'shipuznik:suppliers:v1' // { matKey: { price, markupPct, supplierName } }
 
 function readAll() {
   try {
@@ -48,6 +49,39 @@ export function nextInvoiceNumber() {
   const n = s.invoiceCounter || 1
   saveSettings({ invoiceCounter: n + 1 })
   return n
+}
+
+// ── ספריית מחירי ספקים אישית ──────────────────────────────
+// מבנה: { [materialKey]: { price, markupPct, supplierName, updatedAt } }
+export function getSupplierPrices() {
+  try {
+    const raw = localStorage.getItem(SUPPLIERS_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+
+export function saveSupplierPrice(materialKey, data) {
+  const all = getSupplierPrices()
+  if (data === null) {
+    delete all[materialKey]
+  } else {
+    all[materialKey] = { ...(all[materialKey] || {}), ...data, updatedAt: Date.now() }
+  }
+  localStorage.setItem(SUPPLIERS_KEY, JSON.stringify(all))
+  return all
+}
+
+// מחזיר מחיר אפקטיבי (ספק אישי אם קיים, אחרת ברירת מחדל)
+export function effectivePrice(materialKey, defaultPrice, defaultMarkup) {
+  const all = getSupplierPrices()
+  const sp = all[materialKey]
+  return {
+    price: sp?.price ?? defaultPrice,
+    markupPct: sp?.markupPct ?? defaultMarkup,
+    isCustom: !!sp,
+  }
 }
 
 export function listProjects() {

@@ -1,17 +1,22 @@
-import { useState, useMemo } from 'react'
-import { Plus, Trash2, TrendingUp } from 'lucide-react'
+import { useState, useMemo, useEffect } from 'react'
+import { Plus, Trash2, TrendingUp, Truck } from 'lucide-react'
 import { MATERIAL_CATALOG } from '../data/materials'
+import { getSupplierPrices } from '../utils/storage'
 import { nis, num } from '../utils/format'
 
-// מחשבון עלויות — מחיר קנייה + תוספת רווח (קרמיקה 25%, אחרים 10%)
-export default function CostCalcPage() {
+// מחשבון עלויות — מחיר קנייה + תוספת רווח. משתמש במחירי ספקים אישיים אם קיימים.
+export default function CostCalcPage({ onNavigate }) {
   const [items, setItems] = useState([
     { id: '1', matKey: 'ceramic', qty: 20 },
     { id: '2', matKey: 'adhesive', qty: 5 },
   ])
 
-  // הצמדה של מחירים מותאמים אישית ואחוזי תוספת — נשמרים ב-state כך שניתן לערוך
-  const [overrides, setOverrides] = useState({}) // { [matKey]: { price, markupPct } }
+  const [supplierPrices, setSupplierPrices] = useState({})
+  const [overrides, setOverrides] = useState({}) // עריכות זמניות לפרוייקט הנוכחי
+
+  useEffect(() => {
+    setSupplierPrices(getSupplierPrices())
+  }, [])
 
   function updateItem(id, patch) {
     setItems(items.map(i => (i.id === id ? { ...i, ...patch } : i)))
@@ -28,15 +33,16 @@ export default function CostCalcPage() {
 
   const rows = useMemo(() => items.map(it => {
     const mat = MATERIAL_CATALOG[it.matKey]
+    const sp = supplierPrices[it.matKey]
     const ov = overrides[it.matKey] || {}
-    const price = ov.price !== undefined ? Number(ov.price) : mat.price
-    const markupPct = ov.markupPct !== undefined ? Number(ov.markupPct) : mat.markupPct
+    const price = ov.price !== undefined ? Number(ov.price) : (sp?.price ?? mat.price)
+    const markupPct = ov.markupPct !== undefined ? Number(ov.markupPct) : (sp?.markupPct ?? mat.markupPct)
     const qty = Number(it.qty) || 0
     const cost = qty * price
     const sale = cost * (1 + markupPct / 100)
     const profit = sale - cost
-    return { ...it, mat, price, markupPct, cost, sale, profit }
-  }), [items, overrides])
+    return { ...it, mat, sp, price, markupPct, cost, sale, profit, isCustom: !!sp }
+  }), [items, overrides, supplierPrices])
 
   const totals = useMemo(() => rows.reduce(
     (s, r) => ({ cost: s.cost + r.cost, sale: s.sale + r.sale, profit: s.profit + r.profit }),
@@ -45,7 +51,15 @@ export default function CostCalcPage() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-600">חישוב עלות חומרים + תוספת רווח. ניתן לערוך מחיר ואחוז לכל פריט.</p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm text-gray-600">חישוב עלות חומרים + תוספת רווח.</p>
+        <button
+          onClick={() => onNavigate?.('suppliers')}
+          className="text-sm text-brand-600 font-semibold flex items-center gap-1 flex-shrink-0"
+        >
+          <Truck className="w-4 h-4" /> ספקים
+        </button>
+      </div>
 
       <div className="space-y-2">
         {rows.map(r => (
@@ -60,6 +74,11 @@ export default function CostCalcPage() {
                   <option key={k} value={k}>{m.name}</option>
                 ))}
               </select>
+              {r.isCustom && (
+                <span className="text-[10px] bg-brand-100 text-brand-700 font-bold px-2 py-1 rounded-full flex-shrink-0">
+                  ספק שלי
+                </span>
+              )}
               <button
                 onClick={() => removeItem(r.id)}
                 className="p-2 text-red-500 hover:bg-red-50 rounded-lg"

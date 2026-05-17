@@ -10,6 +10,7 @@ import PackagePicker from '../components/PackagePicker'
 import ExpensesPanel from '../components/ExpensesPanel'
 import ProfitabilityPanel from '../components/ProfitabilityPanel'
 import RatingPanel from '../components/RatingPanel'
+import SchedulePanel from '../components/SchedulePanel'
 
 const TABS = [
   { id: 'items',    label: 'פריטים',   icon: ListChecks },
@@ -134,11 +135,18 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
       )}
 
       {tab === 'payments' && (
-        <PaymentsPanel
-          total={total}
-          milestones={project.milestones || []}
-          onChange={(milestones) => update({ milestones })}
-        />
+        <div className="space-y-3">
+          <PaymentsPanel
+            total={total}
+            milestones={project.milestones || []}
+            onChange={(milestones) => update({ milestones })}
+          />
+          <SchedulePanel
+            startDate={project.startDate}
+            estimatedDays={project.estimatedDays || 0}
+            onChange={(startDate) => update({ startDate })}
+          />
+        </div>
       )}
 
       {tab === 'money' && (

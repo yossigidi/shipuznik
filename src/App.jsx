@@ -13,6 +13,8 @@ import SettingsPage from './pages/SettingsPage'
 import ContractPage from './pages/ContractPage'
 import InvoicePage from './pages/InvoicePage'
 import PortfolioPage from './pages/PortfolioPage'
+import CalendarPage from './pages/CalendarPage'
+import SuppliersPage from './pages/SuppliersPage'
 
 // ניווט בסטייט פשוט — אין react-router, רק עמדת page נוכחית + history
 const PAGE_TITLES = {
@@ -29,6 +31,8 @@ const PAGE_TITLES = {
   contract:    'חוזה עבודה',
   invoice:     'חשבונית',
   portfolio:   'הפורטפוליו שלי',
+  calendar:    'יומן פרוייקטים',
+  suppliers:   'הספקים שלי',
 }
 
 export default function App() {
@@ -67,7 +71,7 @@ function renderPage(page, params, nav) {
     case 'newProject':   return <NewProjectPage onCreated={(id) => nav.replace('project', { id })} />
     case 'project':      return <ProjectPage projectId={params.id} onNavigate={nav.navigate} onDeleted={nav.goHome} />
     case 'quantityCalc': return <QuantityCalcPage />
-    case 'costCalc':     return <CostCalcPage />
+    case 'costCalc':     return <CostCalcPage onNavigate={nav.navigate} />
     case 'clientView':   return <ClientViewPage projectId={params.id} />
     case 'quickQuote':   return <QuickQuotePage />
     case 'clients':      return <ClientsPage onNavigate={nav.navigate} />
@@ -75,6 +79,8 @@ function renderPage(page, params, nav) {
     case 'contract':     return <ContractPage projectId={params.id} onNavigate={nav.navigate} />
     case 'invoice':      return <InvoicePage projectId={params.id} onNavigate={nav.navigate} />
     case 'portfolio':    return <PortfolioPage />
+    case 'calendar':     return <CalendarPage onNavigate={nav.navigate} />
+    case 'suppliers':    return <SuppliersPage />
     default:             return <HomePage onNavigate={nav.navigate} />
   }
 }

@@ -1,0 +1,45 @@
+// אחסון מקומי פשוט ב-localStorage. בעתיד יוחלף ב-Firestore.
+
+const KEY = 'shipuznik:v1'
+
+function readAll() {
+  try {
+    const raw = localStorage.getItem(KEY)
+    return raw ? JSON.parse(raw) : { projects: [] }
+  } catch {
+    return { projects: [] }
+  }
+}
+
+function writeAll(data) {
+  localStorage.setItem(KEY, JSON.stringify(data))
+}
+
+export function listProjects() {
+  return readAll().projects
+}
+
+export function getProject(id) {
+  return readAll().projects.find(p => p.id === id) || null
+}
+
+export function saveProject(project) {
+  const data = readAll()
+  const idx = data.projects.findIndex(p => p.id === project.id)
+  const now = Date.now()
+  const next = { ...project, updatedAt: now, createdAt: project.createdAt || now }
+  if (idx >= 0) data.projects[idx] = next
+  else data.projects.push(next)
+  writeAll(data)
+  return next
+}
+
+export function deleteProject(id) {
+  const data = readAll()
+  data.projects = data.projects.filter(p => p.id !== id)
+  writeAll(data)
+}
+
+export function newProjectId() {
+  return 'p_' + Math.random().toString(36).slice(2, 10)
+}

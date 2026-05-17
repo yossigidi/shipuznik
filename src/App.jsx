@@ -12,6 +12,7 @@ import ClientsPage from './pages/ClientsPage'
 import SettingsPage from './pages/SettingsPage'
 import ContractPage from './pages/ContractPage'
 import InvoicePage from './pages/InvoicePage'
+import PortfolioPage from './pages/PortfolioPage'
 
 // ניווט בסטייט פשוט — אין react-router, רק עמדת page נוכחית + history
 const PAGE_TITLES = {
@@ -27,6 +28,7 @@ const PAGE_TITLES = {
   settings:    'הגדרות',
   contract:    'חוזה עבודה',
   invoice:     'חשבונית',
+  portfolio:   'הפורטפוליו שלי',
 }
 
 export default function App() {
@@ -72,6 +74,7 @@ function renderPage(page, params, nav) {
     case 'settings':     return <SettingsPage />
     case 'contract':     return <ContractPage projectId={params.id} onNavigate={nav.navigate} />
     case 'invoice':      return <InvoicePage projectId={params.id} onNavigate={nav.navigate} />
+    case 'portfolio':    return <PortfolioPage />
     default:             return <HomePage onNavigate={nav.navigate} />
   }
 }

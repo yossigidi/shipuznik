@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, FolderOpen, Calculator, Hammer, ChevronLeft, Zap, Users, Settings as SettingsIcon } from 'lucide-react'
+import { Plus, FolderOpen, Calculator, Hammer, ChevronLeft, Zap, Users, Settings as SettingsIcon, Star } from 'lucide-react'
 import { listProjects } from '../utils/storage'
 import { nis, dateShort } from '../utils/format'
 
@@ -79,6 +79,20 @@ export default function HomePage({ onNavigate }) {
           <div className="text-xs opacity-90">בלקוח? תן מספר ראשוני ב-30 שניות</div>
         </div>
         <ChevronLeft className="w-5 h-5 opacity-80" />
+      </button>
+
+      <button
+        onClick={() => onNavigate('portfolio')}
+        className="w-full card text-right flex items-center gap-3 hover:bg-gray-50"
+      >
+        <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 grid place-items-center flex-shrink-0">
+          <Star className="w-6 h-6" />
+        </div>
+        <div className="flex-1">
+          <div className="font-bold text-gray-900">הפורטפוליו שלי</div>
+          <div className="text-xs text-gray-500">עבודות + דירוגים לשיתוף ללקוחות פוטנציאלים</div>
+        </div>
+        <ChevronLeft className="w-5 h-5 text-gray-400" />
       </button>
 
       {recent.length > 0 && (

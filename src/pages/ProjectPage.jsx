@@ -9,6 +9,7 @@ import PhotosPanel from '../components/PhotosPanel'
 import PackagePicker from '../components/PackagePicker'
 import ExpensesPanel from '../components/ExpensesPanel'
 import ProfitabilityPanel from '../components/ProfitabilityPanel'
+import RatingPanel from '../components/RatingPanel'
 
 const TABS = [
   { id: 'items',    label: 'פריטים',   icon: ListChecks },
@@ -152,6 +153,11 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
             expenses={(project.expenses || []).reduce((s, e) => s + (Number(e.amount) || 0), 0)}
             days={project.estimatedDays || 0}
             onChangeDays={(estimatedDays) => update({ estimatedDays })}
+          />
+          <RatingPanel
+            project={project}
+            rating={project.rating}
+            onChange={(rating) => update({ rating })}
           />
         </div>
       )}

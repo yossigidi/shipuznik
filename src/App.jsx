@@ -73,7 +73,7 @@ function renderPage(page, params, nav) {
     case 'quantityCalc': return <QuantityCalcPage />
     case 'costCalc':     return <CostCalcPage onNavigate={nav.navigate} />
     case 'clientView':   return <ClientViewPage projectId={params.id} />
-    case 'quickQuote':   return <QuickQuotePage />
+    case 'quickQuote':   return <QuickQuotePage onNavigate={nav.navigate} />
     case 'clients':      return <ClientsPage onNavigate={nav.navigate} />
     case 'settings':     return <SettingsPage />
     case 'contract':     return <ContractPage projectId={params.id} onNavigate={nav.navigate} />

@@ -113,6 +113,22 @@ export function newProjectId() {
   return 'p_' + Math.random().toString(36).slice(2, 10)
 }
 
+// יצירת פרוייקט חדש מהצעה מהירה — כולל פריטי עבודה מובנים
+export function createProjectFromQuickQuote({ clientName, phone, title, items }) {
+  const total = (items || []).reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.price) || 0), 0)
+  return saveProject({
+    id: newProjectId(),
+    clientName: clientName || 'לקוח חדש',
+    phone: phone || '',
+    address: '',
+    title: title || 'הצעת מחיר',
+    items: items || [],
+    total,
+    status: 'draft',
+    signature: null,
+  })
+}
+
 // מקבץ פרוייקטים ללקוחות לפי טלפון (או שם אם אין טלפון)
 // מחזיר: [{ key, clientName, phone, address, projects, totalRevenue, lastProjectAt }]
 export function listClients() {

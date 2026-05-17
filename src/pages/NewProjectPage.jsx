@@ -1,12 +1,34 @@
-import { useState } from 'react'
-import { Check } from 'lucide-react'
-import { saveProject, newProjectId } from '../utils/storage'
+import { useState, useMemo, useEffect } from 'react'
+import { Check, User } from 'lucide-react'
+import { saveProject, newProjectId, listClients } from '../utils/storage'
 
 export default function NewProjectPage({ onCreated }) {
   const [clientName, setClientName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [title, setTitle] = useState('')
+  const [clients, setClients] = useState([])
+
+  useEffect(() => {
+    setClients(listClients())
+  }, [])
+
+  // הצעות לקוחות קיימים — מסונן לפי הקלדה בשם/טלפון
+  const suggestions = useMemo(() => {
+    if (!clientName && !phone) return []
+    const s = (clientName + ' ' + phone).trim().toLowerCase()
+    if (s.length < 2) return []
+    return clients.filter(c =>
+      c.clientName.toLowerCase().includes(s) ||
+      (phone && c.phone.includes(phone))
+    ).slice(0, 3)
+  }, [clientName, phone, clients])
+
+  function pickClient(c) {
+    setClientName(c.clientName)
+    setPhone(c.phone)
+    setAddress(c.address)
+  }
 
   function submit(e) {
     e.preventDefault()
@@ -38,6 +60,28 @@ export default function NewProjectPage({ onCreated }) {
           onChange={e => setClientName(e.target.value)}
           autoFocus
         />
+        {suggestions.length > 0 && (
+          <div className="mt-2 bg-brand-50 border border-brand-100 rounded-xl p-2 space-y-1">
+            <div className="text-xs text-brand-700 font-semibold px-1">לקוחות קיימים:</div>
+            {suggestions.map(c => (
+              <button
+                key={c.key}
+                type="button"
+                onClick={() => pickClient(c)}
+                className="w-full bg-white rounded-lg p-2 text-right hover:bg-gray-50 flex items-center gap-2"
+              >
+                <User className="w-4 h-4 text-brand-500 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-sm">{c.clientName}</div>
+                  <div className="text-xs text-gray-500 truncate">
+                    {c.phone}{c.address ? ` · ${c.address}` : ''}
+                  </div>
+                </div>
+                <div className="text-xs text-gray-400">{c.projects.length} פרוייקטים</div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div>

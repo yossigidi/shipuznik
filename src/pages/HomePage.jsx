@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, FolderOpen, Calculator, Hammer, ChevronLeft, Zap } from 'lucide-react'
+import { Plus, FolderOpen, Calculator, Hammer, ChevronLeft, Zap, Users } from 'lucide-react'
 import { listProjects } from '../utils/storage'
 import { nis, dateShort } from '../utils/format'
 
@@ -47,9 +47,15 @@ export default function HomePage({ onNavigate }) {
           onClick={() => onNavigate('projects')}
         />
         <ActionTile
+          icon={<Users className="w-7 h-7" />}
+          title="הלקוחות שלי"
+          subtitle="היסטוריית עבודות"
+          onClick={() => onNavigate('clients')}
+        />
+        <ActionTile
           icon={<Calculator className="w-7 h-7" />}
           title="מחשבון עלויות"
-          subtitle="עלות חומרים + רווח"
+          subtitle="עלות + רווח"
           onClick={() => onNavigate('costCalc')}
         />
       </section>

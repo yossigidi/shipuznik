@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Trash2, Share2, FileText, Phone, MapPin, Pencil, ListChecks, CircleDollarSign, Image as ImageIcon, Sparkles } from 'lucide-react'
+import { Plus, Trash2, Share2, FileText, Phone, MapPin, Pencil, ListChecks, CircleDollarSign, Image as ImageIcon, Sparkles, Wallet } from 'lucide-react'
 import { getProject, saveProject, deleteProject } from '../utils/storage'
 import { nis } from '../utils/format'
 import { UNIT_LABELS } from '../data/workItems'
@@ -7,10 +7,13 @@ import AddItemSheet from '../components/AddItemSheet'
 import PaymentsPanel from '../components/PaymentsPanel'
 import PhotosPanel from '../components/PhotosPanel'
 import PackagePicker from '../components/PackagePicker'
+import ExpensesPanel from '../components/ExpensesPanel'
+import ProfitabilityPanel from '../components/ProfitabilityPanel'
 
 const TABS = [
   { id: 'items',    label: 'פריטים',   icon: ListChecks },
   { id: 'payments', label: 'תשלומים',  icon: CircleDollarSign },
+  { id: 'money',    label: 'כסף',      icon: Wallet },
   { id: 'photos',   label: 'תמונות',   icon: ImageIcon },
 ]
 
@@ -95,7 +98,7 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
         )}
       </section>
 
-      <nav className="grid grid-cols-3 gap-1 bg-white rounded-2xl p-1 shadow-card sticky top-[56px] z-10">
+      <nav className="grid grid-cols-4 gap-1 bg-white rounded-2xl p-1 shadow-card sticky top-[56px] z-10">
         {TABS.map(t => {
           const Icon = t.icon
           const active = tab === t.id
@@ -133,6 +136,22 @@ export default function ProjectPage({ projectId, onNavigate, onDeleted }) {
           milestones={project.milestones || []}
           onChange={(milestones) => update({ milestones })}
         />
+      )}
+
+      {tab === 'money' && (
+        <div className="space-y-3">
+          <ExpensesPanel
+            expenses={project.expenses || []}
+            revenue={total}
+            onChange={(expenses) => update({ expenses })}
+          />
+          <ProfitabilityPanel
+            revenue={total}
+            expenses={(project.expenses || []).reduce((s, e) => s + (Number(e.amount) || 0), 0)}
+            days={project.estimatedDays || 0}
+            onChangeDays={(estimatedDays) => update({ estimatedDays })}
+          />
+        </div>
       )}
 
       {tab === 'photos' && (

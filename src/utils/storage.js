@@ -43,3 +43,31 @@ export function deleteProject(id) {
 export function newProjectId() {
   return 'p_' + Math.random().toString(36).slice(2, 10)
 }
+
+// מקבץ פרוייקטים ללקוחות לפי טלפון (או שם אם אין טלפון)
+// מחזיר: [{ key, clientName, phone, address, projects, totalRevenue, lastProjectAt }]
+export function listClients() {
+  const projects = listProjects()
+  const map = new Map()
+  for (const p of projects) {
+    const key = (p.phone || '').replace(/[^\d]/g, '') || `name:${p.clientName || ''}`
+    if (!map.has(key)) {
+      map.set(key, {
+        key,
+        clientName: p.clientName || 'ללא שם',
+        phone: p.phone || '',
+        address: p.address || '',
+        projects: [],
+        totalRevenue: 0,
+        lastProjectAt: 0,
+      })
+    }
+    const c = map.get(key)
+    c.projects.push(p)
+    c.totalRevenue += Number(p.total) || 0
+    if ((p.updatedAt || 0) > c.lastProjectAt) c.lastProjectAt = p.updatedAt || 0
+    // עדכן את הכתובת לאחרונה שמולאה
+    if (p.address && !c.address) c.address = p.address
+  }
+  return Array.from(map.values()).sort((a, b) => b.lastProjectAt - a.lastProjectAt)
+}
